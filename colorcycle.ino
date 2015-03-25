@@ -1,5 +1,5 @@
-// NeoPixel Ring simple sketch (c) 2013 Shae Erisson
-// released under the GPLv3 license to match the rest of the AdaFruit NeoPixel library
+// colorcycle 1.2 includes an rgb switch for different types of LED strips that can be "RGB" 
+// or "GRB". This also gives us a fade to dark from both red and green on the same strip 
 
 #include <Adafruit_NeoPixel.h>
 #include <avr/power.h>
@@ -9,6 +9,8 @@
 #define NUMPIXELS      8 // number of pixels
 
 int potpin = 0;  // analog pin used to connect the potentiometer
+int rgbswitchin = 12;
+int rgbswitchout = 13 ;
 int val;    // variable to read the value from the analog pin 
 int R=0, G=0, B=0;  // set our color values
 //set our pixel values
@@ -17,10 +19,15 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ80
 int delayval = 10; // delay 
 
 void setup() {
+  pinMode(rgbswitchin, INPUT);
+  pinMode(rgbswitchout, OUTPUT);
+  digitalWrite(rgbswitchout, HIGH);
+  
   pixels.begin(); // This initializes the NeoPixel library.
 }
 
 void loop() {
+  int readrgb = digitalRead(rgbswitchin);
   val = analogRead(potpin);    // reads the value of the potentiometer (value between 0 and 1023)
   val = map(val, 0, 1023, 0, 2040);     // scale it to choose a color
   if (val >= 0 && val <=255){ R=val; G=0; B=0;}
@@ -33,8 +40,16 @@ void loop() {
   else if (val >1785 && val <= 2040){R=255; G= val-1785; B=val-1785;}
   else {R=0; G=0; B=0;} // failsafe
 
-  for(int i=0;i<NUMPIXELS;i++){
 
+  if (readrgb == HIGH){ // then swap Red and Green 
+    int foo = 0;
+    foo = R; R=G; G=foo;
+    }
+
+  for(int i=0;i<NUMPIXELS;i++){
+  
+  
+    
     pixels.setPixelColor(i, pixels.Color(R,G,B)); // set color value
 
     pixels.show(); // This sends the updated pixel color to the hardware.
